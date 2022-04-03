@@ -17,6 +17,9 @@ class TableViewController: UITableViewController {
     
     @IBAction func pushEditAction(_ sender: Any) {
         tableView.setEditing(!tableView.isEditing, animated: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3){ // выполнить код через 0.3 секунды (время
+            self.tableView.reloadData()                         // анимации выезда бургеров в edit mode)
+        }
     }
     
     // Добавляется элемент в ToDoList
@@ -33,8 +36,11 @@ class TableViewController: UITableViewController {
         let alertAction2 = UIAlertAction(title: "Create", style: .cancel) { (alert) in
             // Добавить новую запись
             let newItem = alertController.textFields![0].text
-            addItem(nameItem: newItem!)
-            self.tableView.reloadData()
+            if newItem != "" {
+                addItem(nameItem: newItem!)
+                self.tableView.reloadData()
+                
+            }
         }
         
         alertController.addAction(alertAction1)
@@ -47,6 +53,8 @@ class TableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        tableView.tableFooterView = UIView()
+        tableView.backgroundColor = UIColor.white
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -80,6 +88,14 @@ class TableViewController: UITableViewController {
             cell.imageView?.image = UIImage(named: "check.png")
         } else {
             cell.imageView?.image = UIImage(named: "uncheck.png")
+        }
+        
+        if tableView.isEditing {
+            cell.textLabel?.alpha = 0.5
+            cell.imageView?.alpha = 0.5
+        } else {
+            cell.textLabel?.alpha = 1
+            cell.imageView?.alpha = 1
         }
 
         return cell
@@ -127,6 +143,19 @@ class TableViewController: UITableViewController {
         tableView.reloadData()
     }
     
+    // Чтобы текст не съезжал
+    // Чтобы удалять НЕ в режиме редактирования свайпом
+    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+        if tableView.isEditing {
+            return .none
+        } else {
+            return .delete
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
+        return false
+    }
 
     /*
     // Override to support conditional rearranging of the table view.
